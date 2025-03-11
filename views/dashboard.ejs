@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Workforce Management Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .dashboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .dashboard-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .btn-custom {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 📌 Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">📊 Workforce Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/shift-entry">Shift Entry</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/workers">Manage Workers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/departments">Manage Departments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/teamleaders">Manage Team Leaders</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 📌 Dashboard Content -->
+    <div class="dashboard-container">
+        <h2 class="text-center mt-4 dashboard-title">Welcome to Workforce Management</h2>
+        <p class="text-center">Easily manage shifts, workers, departments, and reports.</p>
+
+        <!-- 📌 Management Section -->
+        <h4 class="text-center mt-4 text-primary">⚙️ Management</h4>
+        <div class="row g-4 mt-2">
+            <div class="col-md-3">
+                <div class="card text-bg-primary text-center p-3">
+                    <h5>📆 Shift Entry</h5>
+                    <a href="/manage-shifts" class="btn btn-light btn-custom">Go</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-success text-center p-3">
+                    <h5>👷 Manage Workers</h5>
+                    <a href="/manage-workers" class="btn btn-light btn-custom">Go</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-warning text-center p-3">
+                    <h5>🏢 Manage Departments</h5>
+                    <a href="/manage-departments" class="btn btn-light btn-custom">Go</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-info text-center p-3">
+                    <h5>🧑‍💼 Manage Team Leaders</h5>
+                    <a href="/manage-teamleaders" class="btn btn-light btn-custom">Go</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📌 Reports Section -->
+        <h4 class="text-center mt-5 text-danger">📊 Reports</h4>
+        <div class="row g-4 mt-2">
+            <div class="col-md-3">
+                <div class="card text-bg-secondary text-center p-3">
+                    <h5>👷 Worker Report</h5>
+                    <a href="/reports/worker" class="btn btn-light btn-custom">View</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-success text-center p-3">
+                    <h5>🏢 Department Report</h5>
+                    <a href="/reports/department" class="btn btn-light btn-custom">View</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-warning text-center p-3">
+                    <h5>🧑‍💼 Team Leader Report</h5>
+                    <a href="/reports/teamleader" class="btn btn-light btn-custom">View</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-bg-danger text-center p-3">
+                    <h5>📌 FTL Report</h5>
+                    <a href="/reports/ftl" class="btn btn-light btn-custom">View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

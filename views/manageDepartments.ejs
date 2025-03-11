@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage Departments</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .container { max-width: 900px; }
+        .table th, .table td { vertical-align: middle; }
+        .input-sm { height: 36px; padding: 5px; text-align: center; }
+        .edit-mode input { background-color: #fff !important; border: 1px solid #ced4da; }
+        .btn-icon { display: flex; align-items: center; justify-content: center; padding: 4px; font-size: 14px; }
+        .switch { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">📌 Manage Departments</h2>
+
+    <!-- ✅ Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- 📌 Department Add Form -->
+    <div class="card shadow-sm p-3 mb-4">
+        <h5 class="mb-3">➕ Add New Department</h5>
+        <form id="addDepartmentForm" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="departmentName" placeholder="Department Name" required>
+            </div>
+            <div class="col-md-4">
+                <input type="number" class="form-control text-center input-sm" id="hourlyTarget" placeholder="Hourly Target" value="350" required>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-success btn-icon">➕ Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 📌 Department Table -->
+    <div class="card shadow-sm p-3">
+        <h5 class="mb-3">📋 Existing Departments</h5>
+        <table class="table table-striped table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Department Name</th>
+                    <th>Hourly Target</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="departmentTable">
+                <% if (departments.length === 0) { %>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No departments found.</td>
+                    </tr>
+                <% } else { %>
+                    <% departments.forEach((department, index) => { %>
+                        <tr id="row-<%= department._id %>">
+                            <td><%= index + 1 %></td>
+                            <td>
+                                <input type="text" class="form-control input-sm department-name"
+                                       id="name-<%= department._id %>"
+                                       value="<%= department.departmentName %>" disabled>
+                            </td>
+                            <td>
+                                <input type="number" class="form-control text-center input-sm hourly-target"
+                                       id="target-<%= department._id %>"
+                                       value="<%= department.hourlyTarget || 350 %>" disabled>
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-check-input switch" id="edit-<%= department._id %>"
+                                       onclick="toggleEditMode('<%= department._id %>')">
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm btn-icon"
+                                        onclick="deleteDepartment('<%= department._id %>')">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 📌 JavaScript -->
+<script>
+    function showToast(message, success = true) {
+        const toastId = `toast-${Date.now()}`;
+        const bgColor = success ? "bg-success" : "bg-danger";
+        const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        document.querySelector(".toast-container").innerHTML += toastHTML;
+        setTimeout(() => document.getElementById(toastId).remove(), 3000);
+    }
+
+    document.getElementById("addDepartmentForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        const departmentName = document.getElementById("departmentName").value;
+        const hourlyTarget = document.getElementById("hourlyTarget").value;
+
+        const response = await fetch("/api/department", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ departmentName, hourlyTarget })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showToast("✅ Department Added!", true);
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast("❌ Error: " + result.message, false);
+        }
+    });
+
+    function toggleEditMode(departmentId) {
+        const isChecked = document.getElementById(`edit-${departmentId}`).checked;
+        document.getElementById(`name-${departmentId}`).disabled = !isChecked;
+        document.getElementById(`target-${departmentId}`).disabled = !isChecked;
+
+        if (!isChecked) {
+            updateDepartment(departmentId);
+        }
+    }
+
+    async function updateDepartment(departmentId) {
+        const departmentName = document.getElementById(`name-${departmentId}`).value;
+        const hourlyTarget = document.getElementById(`target-${departmentId}`).value;
+
+        const response = await fetch(`/api/department/${departmentId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ departmentName, hourlyTarget: Number(hourlyTarget) })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showToast("✅ Department Updated!", true);
+        } else {
+            showToast("❌ Error: " + result.message, false);
+        }
+    }
+
+    async function deleteDepartment(departmentId) {
+        if (!confirm("Are you sure you want to delete this department?")) return;
+
+        const response = await fetch(`/api/department/${departmentId}`, { method: "DELETE" });
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast("✅ Department Deleted!", true);
+            document.getElementById(`row-${departmentId}`).remove();
+        } else {
+            showToast("❌ Error: " + result.message, false);
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Workers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center">👷 Manage Workers</h2>
+        <!-- 📌 Worker Creation Form -->
+        <div class="card p-3 mb-3">
+            <h5>➕ Add New Worker</h5>
+            <form id="addWorkerForm">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="workerName" placeholder="👤 Worker Name" required>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="workerTeamLeader" class="form-select" required>
+                            <option value="" disabled selected>👨‍💼 Select Team Leader</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" id="workerStartedWeek" placeholder="📅 Start Week" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" id="workerStartedYear" placeholder="📅 Start Year" required>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">➕ Add Worker</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- 📌 Worker Search & Sorting -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="searchWorker" class="form-control" placeholder="🔍 Search Worker..." onkeyup="filterWorkers()">
+            </div>
+            <div class="col-md-4">
+                <select id="filterTeamLeader" class="form-select" onchange="filterWorkers()">
+                    <option value="">📋 All Team Leaders</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-success" onclick="downloadCSV()">⬇ Download List</button>
+            </div>
+        </div>
+
+        <!-- 📌 Worker List Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Worker Name</th>
+                        <th>Team Leader</th>
+                        <th>Started Week</th>
+                        <th>Started Year</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="workerList">
+                    <!-- Workers will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 📌 JavaScript -->
+    <script>
+// 📌 Global Variables to Store Data
+let allWorkers = [];
+let allTeamLeaders = [];
+
+// 📌 Load Workers & Team Leaders on Page Load
+document.addEventListener("DOMContentLoaded", async function () {
+    await loadWorkers();
+    await loadTeamLeaders();
+});
+
+// 📌 Add New Worker
+document.getElementById("addWorkerForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("workerName").value.trim();
+    const teamLeader = document.getElementById("workerTeamLeader").value;
+    const startedWeek = document.getElementById("workerStartedWeek").value;
+    const startedYear = document.getElementById("workerStartedYear").value;
+
+    if (!name || !teamLeader || !startedWeek || !startedYear) {
+        alert("⚠️ Please fill in all fields.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/workers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, teamLeader, startedWeek, startedYear, isActive: true })
+        });
+
+        if (response.ok) {
+            console.log("✅ Worker Added Successfully!");
+            document.getElementById("addWorkerForm").reset();
+            loadWorkers(); // Refresh the worker list
+        } else {
+            console.error("❌ Error adding worker.");
+        }
+    } catch (error) {
+        console.error("❌ Error:", error);
+    }
+});
+
+// 📌 Fetch Workers from API
+async function loadWorkers() {
+    try {
+        const response = await fetch("/api/workers");
+        const data = await response.json();
+        if (!data.success) throw new Error("Failed to fetch workers");
+        
+        allWorkers = data.data;
+        renderWorkers(allWorkers, allTeamLeaders);
+    } catch (error) {
+        console.error("❌ Error loading workers:", error);
+    }
+}
+
+// 📌 Fetch Team Leaders from API
+async function loadTeamLeaders() {
+    try {
+        const response = await fetch("/api/teamleaders");
+        const data = await response.json();
+        if (!data.success) throw new Error("Failed to fetch team leaders");
+
+        allTeamLeaders = data.data;
+        populateTeamLeaderDropdown(allTeamLeaders);
+        renderWorkers(allWorkers, allTeamLeaders);
+    } catch (error) {
+        console.error("❌ Error loading team leaders:", error);
+    }
+}
+
+// 📌 Populate Team Leader Filter Dropdown
+function populateTeamLeaderDropdown(teamLeaders) {
+    const select = document.getElementById("workerTeamLeader");
+    select.innerHTML = `<option value="" disabled selected>👨‍💼 Select Team Leader</option>`; // Reset dropdown
+
+    teamLeaders.forEach(leader => {
+        select.innerHTML += `<option value="${leader._id}">${leader.name}</option>`;
+    });
+    const filterDropdown = document.getElementById("filterTeamLeader");
+    filterDropdown.innerHTML = `<option value="">📋 All Team Leaders</option>`;
+    
+    teamLeaders.forEach(leader => {
+        filterDropdown.innerHTML += `<option value="${leader._id}">${leader.name}</option>`;
+    });
+}
+
+// 📌 Render Worker Table
+function renderWorkers(workers, teamLeaders) {
+    const workerList = document.getElementById("workerList");
+    workerList.innerHTML = "";
+
+    workers.forEach((worker, index) => {
+        const teamLeaderId = worker.teamLeader ? worker.teamLeader._id : "";
+        const teamLeaderName = worker.teamLeader ? worker.teamLeader.name : "No Leader";
+
+        workerList.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+
+                <!-- Editable Worker Name -->
+                <td contenteditable="true" onblur="updateWorker('${worker._id}', 'name', this.innerText.trim(), '${worker.name}')">
+                    ${worker.name}
+                </td>
+
+                <!-- Team Leader Dropdown -->
+                <td>
+                    <select class="form-select form-select-sm" onchange="updateWorker('${worker._id}', 'teamLeader', this.value, '${teamLeaderId}')">
+                        ${teamLeaders.map(leader => `
+                            <option value="${leader._id}" ${leader._id === teamLeaderId ? "selected" : ""}>
+                                ${leader.name}
+                            </option>
+                        `).join('')}
+                    </select>
+                </td>
+
+                <!-- Editable Started Week -->
+                <td contenteditable="true" onblur="updateWorker('${worker._id}', 'startedWeek', this.innerText.trim(), '${worker.startedWeek}')">
+                    ${worker.startedWeek}
+                </td>
+
+                <!-- Editable Started Year -->
+                <td contenteditable="true" onblur="updateWorker('${worker._id}', 'startedYear', this.innerText.trim(), '${worker.startedYear}')">
+                    ${worker.startedYear}
+                </td>
+
+                <!-- Active Status Toggle -->
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input" ${worker.isActive ? "checked" : ""}
+                        onchange="updateWorker('${worker._id}', 'isActive', this.checked, ${worker.isActive})">
+                </td>
+
+                <!-- Delete Button -->
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteWorker('${worker._id}')">🗑</button>
+                </td>
+            </tr>`;
+    });
+}
+
+// 📌 Update Worker Field (Only If Changed)
+async function updateWorker(id, field, newValue, oldValue) {
+    if (field === "isActive") {
+        oldValue = oldValue === "true" || oldValue === true;
+        newValue = newValue === "true" || newValue === true;
+    }
+
+    if (newValue == oldValue) return; // Prevents unnecessary API calls
+
+    console.log(`🔄 Updating Worker (${id}) | Field: ${field} | New Value: ${newValue}`);
+
+    try {
+        const response = await fetch(`/api/workers/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ [field]: newValue })
+        });
+
+        if (response.ok) {
+            console.log(`✅ Worker Updated: ${id}`);
+            loadWorkers(); // Refresh list to reflect changes
+        } else {
+            console.error(`❌ Update Failed for ${id}`);
+        }
+    } catch (error) {
+        console.error("❌ Error updating worker:", error);
+    }
+}
+
+// 📌 Delete Worker & Performance Data
+async function deleteWorker(id) {
+    if (!confirm("⚠️ Delete worker and all performance records?")) return;
+
+    try {
+        const response = await fetch(`/api/workers/${id}`, { method: "DELETE" });
+
+        if (response.ok) {
+            console.log(`✅ Worker Deleted: ${id}`);
+            loadWorkers();
+        } else {
+            console.error(`❌ Error deleting worker: ${id}`);
+        }
+    } catch (error) {
+        console.error("❌ Error deleting worker:", error);
+    }
+}
+
+// 📌 Worker Search & Filter
+function filterWorkers() {
+    const searchQuery = document.getElementById("searchWorker").value.toLowerCase();
+    const selectedTeamLeader = document.getElementById("filterTeamLeader").value;
+
+    // Filter Workers by Name & Team Leader
+    const filteredWorkers = allWorkers.filter(worker => {
+        const matchesName = worker.name.toLowerCase().includes(searchQuery);
+        const matchesTeamLeader = selectedTeamLeader ? worker.teamLeader?._id === selectedTeamLeader : true;
+        return matchesName && matchesTeamLeader;
+    });
+
+    // Re-render the Table with Filtered Workers
+    renderWorkers(filteredWorkers, allTeamLeaders);
+}
+
+// 📌 Download Worker Data as CSV
+function downloadCSV() {
+    fetch("/api/workers")
+        .then(response => response.json())
+        .then(data => {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Name,Started Week,Started Year,Active,Team Leader\n";
+
+            data.data.forEach(worker => {
+                let row = [
+                    worker.name,
+                    worker.startedWeek,
+                    worker.startedYear,
+                    worker.isActive ? "Active" : "Inactive",
+                    worker.teamLeader ? worker.teamLeader.name : "No Leader"
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "workers.csv");
+            document.body.appendChild(link);
+            link.click();
+        });
+}
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
