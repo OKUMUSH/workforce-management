@@ -29,9 +29,9 @@ const createTeamLeader = async (req, res) => {
 const updateTeamLeader = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, active } = req.body;
 
-    const updatedTeamLeader = await TeamLeader.findByIdAndUpdate(id, { name }, { new: true });
+    const updatedTeamLeader = await TeamLeader.findByIdAndUpdate(id, { name, active }, { new: true });
 
     if (!updatedTeamLeader) return res.status(404).json({ success: false, message: "Team Leader Not Found" });
 
