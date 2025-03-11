@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const connectDB = require("../config/db");
 
 const Worker = require("../models/Worker");
-const TeamLeader = require("../models/TeamLeader");
+const Teamleader = require("../models/Teamleader");
 const Department = require("../models/Department");
 const Shift = require("../models/Shifts");
 const DepartmentShift = require("../models/DepartmentShift");
@@ -33,7 +33,7 @@ const seedDatabase = async () => {
   try {
     // **Clear all collections**
     await Worker.deleteMany();
-    await TeamLeader.deleteMany();
+    await Teamleader.deleteMany();
     await Department.deleteMany();
     await Shift.deleteMany();
     await DepartmentShift.deleteMany();
@@ -42,7 +42,7 @@ const seedDatabase = async () => {
     console.log("🗑️ All collections have been cleared!");
 
     // **Add Team Leaders**
-    const teamLeaders = await TeamLeader.insertMany([
+    const teamleaders = await Teamleader.insertMany([
       { name: "Tomasz", active: true },
       { name: "Nenad", active: true },
       { name: "Costel", active: true },
@@ -85,7 +85,7 @@ const seedDatabase = async () => {
         name: `Worker ${i + 1}`,
         startedWeek: Math.floor(Math.random() * 52) + 1,
         startedYear: 2024,
-        teamLeaderId: teamLeaders[i % teamLeaders.length]._id,
+        teamleaderId: teamleaders[i % teamleaders.length]._id,
         active: Math.random() > 0.2 // 20% chance of being inactive
       }))
     );
@@ -120,10 +120,10 @@ const seedDatabase = async () => {
 
     insertedShifts.forEach((shift) => {
       const assignedDepartment = departments[Math.floor(Math.random() * departments.length)];
-      const assignedTeamLeader = teamLeaders[Math.floor(Math.random() * teamLeaders.length)];
+      const assignedTeamleader = teamleaders[Math.floor(Math.random() * teamleaders.length)];
 
       departmentShifts.push({
-        teamLeaderId: assignedTeamLeader._id,
+        teamleaderId: assignedTeamleader._id,
         shiftId: shift._id,
         departmentId: assignedDepartment._id
       });

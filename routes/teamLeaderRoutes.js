@@ -1,23 +1,23 @@
 const express = require("express");
 const {
-  getAllTeamLeaders,
-  createTeamLeader,
-  updateTeamLeader,
-  deleteTeamLeader
-} = require("../controllers/teamLeaderController");
+  getAllTeamleaders,
+  createTeamleader,
+  updateTeamleader,
+  deleteTeamleader
+} = require("../controllers/teamleaderController");
 
 const router = express.Router();
 
 // 📌 Tüm Takım Liderlerini Getir
-router.get("/", getAllTeamLeaders);
+router.get("/", getAllTeamleaders);
 
 // 📌 Yeni Takım Lideri Ekle
-router.post("/", createTeamLeader);
+router.post("/", createTeamleader);
 
 // 📌 Takım Liderini Güncelle
-router.put("/:id", updateTeamLeader);
+router.put("/:id", updateTeamleader);
 
 // 📌 Takım Liderini Sil
-router.delete("/:id", deleteTeamLeader);
+router.delete("/:id", deleteTeamleader);
 
 module.exports = router;

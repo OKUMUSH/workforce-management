@@ -15,18 +15,18 @@
             <form id="addWorkerForm">
                 <div class="row g-2">
                     <div class="col-md-3">
-                        <input type="text" class="form-control" id="workerName" placeholder="👤 Worker Name" required>
+                        <input type="text" class="form-control" id="name" placeholder="👤 Worker Name" required>
                     </div>
                     <div class="col-md-3">
-                        <select id="workerTeamLeader" class="form-select" required>
-                            <option value="" disabled selected>👨‍💼 Select Team Leader</option>
+                        <select id="fixedTeamleader" class="form-select" required>
+                            <option value="" disabled selected>👨‍💼 Select FTL</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" id="workerStartedWeek" placeholder="📅 Start Week" required>
+                        <input type="number" class="form-control" id="startedWeek" placeholder="📅 Start Week" required>
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" id="workerStartedYear" placeholder="📅 Start Year" required>
+                        <input type="number" class="form-control" id="startedYear" placeholder="📅 Start Year" required>
                     </div>
                     <div class="col-md-2 d-grid">
                         <button type="submit" class="btn btn-primary">➕ Add Worker</button>
@@ -40,8 +40,8 @@
                 <input type="text" id="searchWorker" class="form-control" placeholder="🔍 Search Worker..." onkeyup="filterWorkers()">
             </div>
             <div class="col-md-4">
-                <select id="filterTeamLeader" class="form-select" onchange="filterWorkers()">
-                    <option value="">📋 All Team Leaders</option>
+                <select id="filterTeamleader" class="form-select" onchange="filterWorkers()">
+                    <option value="">📋 All FTL's</option>
                 </select>
             </div>
             <div class="col-md-4 text-end">
@@ -55,8 +55,8 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Worker Name</th>
-                        <th>Team Leader</th>
+                        <th>Name</th>
+                        <th>FTL</th>
                         <th>Started Week</th>
                         <th>Started Year</th>
                         <th>Active</th>
@@ -74,24 +74,24 @@
     <script>
 // 📌 Global Variables to Store Data
 let allWorkers = [];
-let allTeamLeaders = [];
+let allTeamleaders = [];
 
 // 📌 Load Workers & Team Leaders on Page Load
 document.addEventListener("DOMContentLoaded", async function () {
     await loadWorkers();
-    await loadTeamLeaders();
+    await loadTeamleaders();
 });
 
 // 📌 Add New Worker
 document.getElementById("addWorkerForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const name = document.getElementById("workerName").value.trim();
-    const teamLeader = document.getElementById("workerTeamLeader").value;
-    const startedWeek = document.getElementById("workerStartedWeek").value;
-    const startedYear = document.getElementById("workerStartedYear").value;
+    const name = document.getElementById("name").value.trim();
+    const teamleader = document.getElementById("fixedTeamleader").value;
+    const startedWeek = document.getElementById("startedWeek").value;
+    const startedYear = document.getElementById("startedYear").value;
 
-    if (!name || !teamLeader || !startedWeek || !startedYear) {
+    if (!name || !teamleader || !startedWeek || !startedYear) {
         alert("⚠️ Please fill in all fields.");
         return;
     }
@@ -100,7 +100,7 @@ document.getElementById("addWorkerForm").addEventListener("submit", async functi
         const response = await fetch("/api/workers", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, teamLeader, startedWeek, startedYear, isActive: true })
+            body: JSON.stringify({ name, teamleader, startedWeek, startedYear, active: true })
         });
 
         if (response.ok) {
@@ -123,51 +123,52 @@ async function loadWorkers() {
         if (!data.success) throw new Error("Failed to fetch workers");
         
         allWorkers = data.data;
-        renderWorkers(allWorkers, allTeamLeaders);
+        renderWorkers(allWorkers, allTeamleaders);
     } catch (error) {
         console.error("❌ Error loading workers:", error);
     }
 }
 
 // 📌 Fetch Team Leaders from API
-async function loadTeamLeaders() {
+async function loadTeamleaders() {
     try {
         const response = await fetch("/api/teamleaders");
         const data = await response.json();
-        if (!data.success) throw new Error("Failed to fetch team leaders");
+        if (!data.success) throw new Error("Failed to fetch teamleaders");
 
-        allTeamLeaders = data.data;
-        populateTeamLeaderDropdown(allTeamLeaders);
-        renderWorkers(allWorkers, allTeamLeaders);
+        allTeamleaders = data.data;
+        populateTeamleaderDropdown(allTeamleaders);
+        renderWorkers(allWorkers, allTeamleaders);
     } catch (error) {
-        console.error("❌ Error loading team leaders:", error);
+        console.error("❌ Error loading Teamleaders:", error);
     }
 }
 
 // 📌 Populate Team Leader Filter Dropdown
-function populateTeamLeaderDropdown(teamLeaders) {
-    const select = document.getElementById("workerTeamLeader");
-    select.innerHTML = `<option value="" disabled selected>👨‍💼 Select Team Leader</option>`; // Reset dropdown
+function populateTeamleaderDropdown(teamleaders) {
+    const select = document.getElementById("fixedTeamleader");
+    select.innerHTML = `<option value="" disabled selected>👨‍💼 Select FTL</option>`; // Reset dropdown
 
-    teamLeaders.forEach(leader => {
+    teamleaders.forEach(leader => {
         select.innerHTML += `<option value="${leader._id}">${leader.name}</option>`;
     });
-    const filterDropdown = document.getElementById("filterTeamLeader");
-    filterDropdown.innerHTML = `<option value="">📋 All Team Leaders</option>`;
+    const filterDropdown = document.getElementById("filterTeamleader");
+    filterDropdown.innerHTML = `<option value="">📋 All FTL's</option>`;
     
-    teamLeaders.forEach(leader => {
+    teamleaders.forEach(leader => {
         filterDropdown.innerHTML += `<option value="${leader._id}">${leader.name}</option>`;
     });
 }
 
 // 📌 Render Worker Table
-function renderWorkers(workers, teamLeaders) {
+function renderWorkers(workers, teamleader) {
     const workerList = document.getElementById("workerList");
     workerList.innerHTML = "";
 
     workers.forEach((worker, index) => {
-        const teamLeaderId = worker.teamLeader ? worker.teamLeader._id : "";
-        const teamLeaderName = worker.teamLeader ? worker.teamLeader.name : "No Leader";
+        // Check if the worker has an assigned FTL
+        const teamleaderId = worker.teamleaderId || ""; // Use teamleaderId directly
+        const teamleaderName = "FTL (Selected)"; // Placeholder since name is missing
 
         workerList.innerHTML += `
             <tr>
@@ -178,11 +179,12 @@ function renderWorkers(workers, teamLeaders) {
                     ${worker.name}
                 </td>
 
-                <!-- Team Leader Dropdown -->
+                <!-- Teamleader Dropdown -->
                 <td>
-                    <select class="form-select form-select-sm" onchange="updateWorker('${worker._id}', 'teamLeader', this.value, '${teamLeaderId}')">
-                        ${teamLeaders.map(leader => `
-                            <option value="${leader._id}" ${leader._id === teamLeaderId ? "selected" : ""}>
+                    <select class="form-select form-select-sm" onchange="updateWorker('${worker._id}', 'teamleaderId', this.value, '${teamleaderId}')">
+                        <option value="" ${!teamleaderId ? "selected" : ""} disabled>NO FTL</option>
+                        ${teamleader.map(leader => `
+                            <option value="${leader._id}" ${leader._id === teamleaderId ? "selected" : ""}>
                                 ${leader.name}
                             </option>
                         `).join('')}
@@ -201,8 +203,8 @@ function renderWorkers(workers, teamLeaders) {
 
                 <!-- Active Status Toggle -->
                 <td class="text-center">
-                    <input type="checkbox" class="form-check-input" ${worker.isActive ? "checked" : ""}
-                        onchange="updateWorker('${worker._id}', 'isActive', this.checked, ${worker.isActive})">
+                    <input type="checkbox" class="form-check-input" ${worker.active ? "checked" : ""}
+                        onchange="updateWorker('${worker._id}', 'active', this.checked, ${worker.active})">
                 </td>
 
                 <!-- Delete Button -->
@@ -214,7 +216,7 @@ function renderWorkers(workers, teamLeaders) {
 }
 
 // 📌 Update Worker Field (Only If Changed)
-async function updateWorker(id, field, newValue, oldValue) {
+async function updateWorker(id, field, newValue, oldValue, teamleaderId) {
     if (field === "isActive") {
         oldValue = oldValue === "true" || oldValue === true;
         newValue = newValue === "true" || newValue === true;
@@ -263,17 +265,17 @@ async function deleteWorker(id) {
 // 📌 Worker Search & Filter
 function filterWorkers() {
     const searchQuery = document.getElementById("searchWorker").value.toLowerCase();
-    const selectedTeamLeader = document.getElementById("filterTeamLeader").value;
+    const selectedTeamLeader = document.getElementById("filterTeamleader").value;
 
     // Filter Workers by Name & Team Leader
     const filteredWorkers = allWorkers.filter(worker => {
         const matchesName = worker.name.toLowerCase().includes(searchQuery);
-        const matchesTeamLeader = selectedTeamLeader ? worker.teamLeader?._id === selectedTeamLeader : true;
-        return matchesName && matchesTeamLeader;
+        const matchesTeamleader = selectedTeamleader ? worker.teamleader?._id === selectedTeamleader : true;
+        return matchesName && matchesTeamleader;
     });
 
     // Re-render the Table with Filtered Workers
-    renderWorkers(filteredWorkers, allTeamLeaders);
+    renderWorkers(filteredWorkers, allTeamleaders);
 }
 
 // 📌 Download Worker Data as CSV
@@ -282,15 +284,15 @@ function downloadCSV() {
         .then(response => response.json())
         .then(data => {
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Name,Started Week,Started Year,Active,Team Leader\n";
+            csvContent += "Name,Started Week,Started Year,Active,Teamleader\n";
 
             data.data.forEach(worker => {
                 let row = [
                     worker.name,
                     worker.startedWeek,
                     worker.startedYear,
-                    worker.isActive ? "Active" : "Inactive",
-                    worker.teamLeader ? worker.teamLeader.name : "No Leader"
+                    worker.active ? "Active" : "Inactive",
+                    worker.teamleader ? worker.teamleader.name : "No FTLr"
                 ].join(",");
                 csvContent += row + "\n";
             });

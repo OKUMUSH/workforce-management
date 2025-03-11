@@ -2,10 +2,11 @@ const express = require("express");
 const connectDB = require("./config/db");
 require("dotenv").config();
 const departmentRoutes = require("./routes/departmentRoutes");
-const teamLeaderRoutes = require("./routes/teamLeaderRoutes");
+const teamleaderRoutes = require("./routes/teamleaderRoutes");
 const workerRoutes = require("./routes/workerRoutes");
 const Worker = require("./models/Worker"); 
-const TeamLeader = require("./models/TeamLeader");
+const Department = require("./models/Department");
+const Teamleader = require("./models/Teamleader");
 const shiftRoutes = require("./routes/shiftRoutes");
 
 const app = express();
@@ -26,7 +27,7 @@ app.use(express.static("public")); // 📌 Statik dosyalar (CSS, JS)
 app.use("/api/department", departmentRoutes);
 
 // 📌 Teamleader Rotaları Kullan
-app.use("/api/teamleaders", teamLeaderRoutes);
+app.use("/api/teamleaders", teamleaderRoutes);
 
 // 📌 Worker Rotaları Kullan
 app.use("/api/workers", workerRoutes);
@@ -44,16 +45,19 @@ app.get("/manage-shifts", (req, res) => {
 }
 );
 
-// 📌 Manage Workers Page (Fix for teamLeaders)
+// 📌 Manage Workers Page (Fix for teamleaders)
 app.get("/manage-workers", async (req, res) => {
   try {
-      const workers = await Worker.find().populate("teamLeader", "name").lean();
-      const teamLeaders = await TeamLeader.find().lean();
-      
-      console.log("✅ Fetched Workers:", workers);
-      console.log("✅ Fetched Team Leaders:", teamLeaders);
+      const workers = await Worker.find().lean();
+      const teamleaders = await Teamleader.find().lean();
+      const fixedteamleaders = teamleaders.map(tl => ({ _id: tl._id, name: tl.name }));
 
-      res.render("manageWorkers", { workers: { data: workers }, teamLeaders });  // Ensure data key
+      console.log("✅ Fetched Workers:", workers);
+      console.log("✅ Fetched Team Leaders:", teamleaders);
+      console.log("✅ Fixed Team Leaders:", fixedteamleaders);
+
+      res.render("manageWorkers", { workers, teamleaders, fixedteamleaders });  // Ensure data key
+
   } catch (error) {
       console.error("❌ Error fetching workers:", error);
       res.status(500).send("Internal Server Error");
@@ -63,9 +67,10 @@ app.get("/manage-workers", async (req, res) => {
 // 📌 Manage Departments Sayfası
 app.get("/manage-departments", async (req, res) => {
   try {
-      const Department = require("./models/Department");
+
       const departments = await Department.find().lean();
       res.render("manageDepartments", { departments });
+
   } catch (error) {
       console.error("❌ Manage Departments Error:", error);
       res.status(500).send("Internal Server Error");
@@ -75,11 +80,10 @@ app.get("/manage-departments", async (req, res) => {
 // 📌 Manage TeamLeaders Sayfası
 app.get("/manage-teamleaders", async (req, res) => {
   try {
-      const TeamLeader = require("./models/TeamLeader");
-      const teamLeaders = await TeamLeader.find().lean();
-      res.render("manageTeamLeaders", { teamLeaders });
+      const teamleaders = await Teamleader.find().lean();
+      res.render("manageTeamleaders", { teamleaders });
   } catch (error) {
-      console.error("❌ Manage TeamLeaders Error:", error);
+      console.error("❌ Manage Teamleaders Error:", error);
       res.status(500).send("Internal Server Error");
   }
 });

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ShiftDepartment = require("../models/DepartmentShift");
-const TeamLeader = require("../models/TeamLeader");
+const TeamLeader = require("../models/Teamleader");
 const Department = require("../models/Department");
 
 // 📌 Get all shifts (with filters)

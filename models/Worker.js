@@ -4,7 +4,7 @@ const WorkerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   startedWeek: { type: Number, required: true },
   startedYear: { type: Number, required: true },
-  teamLeaderId: { type: mongoose.Schema.Types.ObjectId, ref: "TeamLeader" },
+  teamleaderId: { type: mongoose.Schema.Types.ObjectId, ref: "Teamleader" },
   active: { type: Boolean, default: true } // ✅ New field added
 });
 

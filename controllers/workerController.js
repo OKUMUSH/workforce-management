@@ -4,7 +4,7 @@ const WorkerPerformance = require("../models/Performance");
 // 📌 Get all workers
 const getAllWorkers = async (req, res) => {
   try {
-    const workers = await Worker.find().populate("teamLeader");
+    const workers = await Worker.find();
     res.json({ success: true, data: workers });
   } catch (error) {
     console.error("❌ Error fetching workers:", error);
@@ -15,11 +15,11 @@ const getAllWorkers = async (req, res) => {
 // 📌 Add a new worker
 const addWorker = async (req, res) => {
   try {
-    const { name, teamLeader, startedWeek, startedYear, isActive } = req.body;
-    if (!name || !teamLeader || !startedWeek || !startedYear) {
+    const { name, teamleader, startedWeek, startedYear, active } = req.body;
+    if (!name || !teamleader || !startedWeek || !startedYear) {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
-    const newWorker = new Worker({ name, teamLeader, startedWeek, startedYear, isActive });
+    const newWorker = new Worker({ name, teamleader, startedWeek, startedYear, active });
     await newWorker.save();
     res.status(201).json({ success: true, data: newWorker });
   } catch (error) {
@@ -31,10 +31,10 @@ const addWorker = async (req, res) => {
 // 📌 Update worker details
 const updateWorker = async (req, res) => {
   try {
-    const { name, teamLeader, startedWeek, startedYear, isActive } = req.body;
+    const { name, teamleaderId, startedWeek, startedYear, active } = req.body;
     const updatedWorker = await Worker.findByIdAndUpdate(
       req.params.id,
-      { name, teamLeader, startedWeek, startedYear, isActive },
+      { name, teamleaderId, startedWeek, startedYear, active },
       { new: true }
     );
     if (!updatedWorker) {
