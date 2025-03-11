@@ -28,10 +28,10 @@
         <h5 class="mb-3">➕ Add New Department</h5>
         <form id="addDepartmentForm" class="row g-3 align-items-center">
             <div class="col-md-6">
-                <input type="text" class="form-control" id="departmentName" placeholder="Department Name" required>
+                <input type="text" class="form-control" id="name" placeholder="Name" required>
             </div>
             <div class="col-md-4">
-                <input type="number" class="form-control text-center input-sm" id="hourlyTarget" placeholder="Hourly Target" value="350" required>
+                <input type="number" class="form-control text-center input-sm" id="target" placeholder="Target" value="350" required>
             </div>
             <div class="col-md-2 d-grid">
                 <button type="submit" class="btn btn-success btn-icon">➕ Add</button>
@@ -47,7 +47,7 @@
                 <tr>
                     <th>#</th>
                     <th>Department Name</th>
-                    <th>Hourly Target</th>
+                    <th>Target</th>
                     <th>Edit</th>
                     <th>Delete</th>
                 </tr>
@@ -60,21 +60,25 @@
                 <% } else { %>
                     <% departments.forEach((department, index) => { %>
                         <tr id="row-<%= department._id %>">
-                            <td><%= index + 1 %></td>
-                            <td>
-                                <input type="text" class="form-control input-sm department-name"
-                                       id="name-<%= department._id %>"
-                                       value="<%= department.departmentName %>" disabled>
-                            </td>
-                            <td>
-                                <input type="number" class="form-control text-center input-sm hourly-target"
-                                       id="target-<%= department._id %>"
-                                       value="<%= department.hourlyTarget || 350 %>" disabled>
-                            </td>
-                            <td>
-                                <input type="checkbox" class="form-check-input switch" id="edit-<%= department._id %>"
-                                       onclick="toggleEditMode('<%= department._id %>')">
-                            </td>
+                            <form action="addDepartment" method="post">
+                                <td><%= index + 1 %></td>
+                                <td>
+                                    <input type="text" class="form-control input-sm name"
+                                        id="name-<%= department._id %>"
+                                        value="<%= department.name %>" disabled>
+                                    
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center input-sm target"
+                                        id="target-<%= department._id %>"
+                                        value="<%= department.target || 111 %>" disabled>
+                                </td>
+                                <td>
+                                    <input type="checkbox" class="form-check-input switch" id="edit-<%= department._id %>"
+                                        onclick="toggleEditMode('<%= department._id %>')">
+                                </td>
+
+                            </form>
                             <td>
                                 <button class="btn btn-danger btn-sm btn-icon"
                                         onclick="deleteDepartment('<%= department._id %>')">
@@ -108,13 +112,13 @@
 
     document.getElementById("addDepartmentForm").addEventListener("submit", async function(event) {
         event.preventDefault();
-        const departmentName = document.getElementById("departmentName").value;
-        const hourlyTarget = document.getElementById("hourlyTarget").value;
+        const name = document.getElementById("name").value;
+        const target = document.getElementById("target").value;
 
         const response = await fetch("/api/department", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ departmentName, hourlyTarget })
+            body: JSON.stringify({ name, target })
         });
 
         const result = await response.json();
@@ -137,13 +141,13 @@
     }
 
     async function updateDepartment(departmentId) {
-        const departmentName = document.getElementById(`name-${departmentId}`).value;
-        const hourlyTarget = document.getElementById(`target-${departmentId}`).value;
+        const name = document.getElementById(`name-${departmentId}`).value;
+        const target = document.getElementById(`target-${departmentId}`).value;
 
         const response = await fetch(`/api/department/${departmentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ departmentName, hourlyTarget: Number(hourlyTarget) })
+            body: JSON.stringify({ name, target: Number(target) })
         });
 
         const result = await response.json();

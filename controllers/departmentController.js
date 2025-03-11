@@ -15,14 +15,14 @@ const getDepartments = async (req, res) => {
 const addDepartment = async (req, res) => {
     try {
         console.log("🔍 [POST] /department - New department:", req.body);
-        const { departmentName, hourlyTarget = 350 } = req.body;
+        const { name, target = 350 } = req.body;
 
-        if (!departmentName) {
+        if (!name) {
             console.error("❌ [POST] Missing department name!");
             return res.status(400).json({ message: "Department name is required" });
         }
 
-        const newDepartment = new Department({ departmentName, hourlyTarget });
+        const newDepartment = new Department({ name, target });
         await newDepartment.save();
         console.log("✅ [POST] Department added successfully:", newDepartment);
         res.status(201).json(newDepartment);
@@ -37,16 +37,16 @@ const updateDepartment = async (req, res) => {
     try {
         console.log(`🔍 [PUT] /department/${req.params.id} - Update request received:`, req.body);
         const { id } = req.params;
-        const { departmentName, hourlyTarget } = req.body;
+        const { name, target } = req.body;
 
-        if (!hourlyTarget) {
-            console.error("❌ [PUT] Missing hourly target!");
-            return res.status(400).json({ message: "Hourly target is required" });
+        if (!target) {
+            console.error("❌ [PUT] Target!");
+            return res.status(400).json({ message: "Target is required" });
         }
 
         const updated = await Department.findByIdAndUpdate(
             id,
-            { departmentName, hourlyTarget },
+            { name, target },
             { new: true }
         );
 
