@@ -14,10 +14,11 @@ const getAllTeamLeaders = async (req, res) => {
 // 📌 Yeni Takım Lideri Ekle
 const createTeamLeader = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, active } = req.body;
     if (!name) return res.status(400).json({ success: false, message: "Name is required" });
+    if (typeof active !== "boolean") return res.status(400).json({ success: false, message: "Active status is required" });
 
-    const newTeamLeader = await TeamLeader.create({ name });
+    const newTeamLeader = await TeamLeader.create({ name, active });
     res.status(201).json({ success: true, data: newTeamLeader });
   } catch (error) {
     console.error("❌ Create Team Leader Error:", error);
