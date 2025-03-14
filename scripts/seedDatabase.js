@@ -8,17 +8,18 @@ const Shift = require("../models/Shifts");
 const DepartmentShift = require("../models/DepartmentShift");
 const Performance = require("../models/Performance");
 const Incident = require("../models/Incident");
+const { Logger } = require("sequelize/lib/utils/logger");
 
 
 // 📌 Shift Codes Mapping
 const shiftCodes = {
-  Monday: { Morning: "MAPO", Afternoon: "MAPA" },
-  Tuesday: { Morning: "WOPO", Afternoon: "WOPA" },
-  Wednesday: { Morning: "DOPO", Afternoon: "DOPA" },
-  Thursday: { Morning: "VRPO", Afternoon: "VRPA" },
-  Friday: { Morning: "ZOPO", Afternoon: "ZOPA" },
-  Saturday: { Morning: "ZAPO", Afternoon: "ZAPA" },
-  Sunday: { Morning: "SOPO", Afternoon: "SOPA" },
+  Monday: { Morning: "MONDAY MAPO", Afternoon: "MONDAY MAPA" },
+  Tuesday: { Morning: "TUESDAY WOPO", Afternoon: "TUESDAY WOPA" },
+  Wednesday: { Morning: "WEDNESDAY DOPO", Afternoon: "WEDNESDAY DOPA" },
+  Thursday: { Morning: "THURSDAY VRPO", Afternoon: "THURSDAY VRPA" },
+  Friday: { Morning: "FRIDAY ZOPO", Afternoon: "FRIDAY ZOPA" },
+  Saturday: { Morning: "SATURDAY ZAPO", Afternoon: "SATURDAY ZAPA" },
+  Sunday: { Morning: "SUNDAY SOPO", Afternoon: "SUNDAY SOPA" },
 };
 
 // 📌 Function to calculate the week number from a given date
@@ -62,6 +63,7 @@ const seedDatabase = async () => {
       { name: "DPVR PICKING", target: 350 },
     ]);
 
+
     // **Check for duplicate department names before inserting**
     const existingDepartments = await Department.find();
     const existingNames = new Set(existingDepartments.map(d => d.name));
@@ -91,28 +93,43 @@ const seedDatabase = async () => {
     );
     console.log("✅ 50 Workers added!");
 
-   // **Generate shifts for the entire year 2025**
-   const shifts = [];
-   const startDate = new Date("2025-01-01T00:00:00.000Z");
-   const endDate = new Date("2025-12-31T23:59:59.999Z");
+    // **Generate shifts for the entire year 2025-2030**
+    const shifts = [];
+    const startDate = new Date("2024-12-31T23:59:59.999Z");
+    const endDate = new Date("2030-12-31T23:59:59.999Z");
 
-   for (let date = new Date(startDate.getTime()); date <= endDate; date.setDate(date.getDate() + 1)) {
-       const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
+    for (let date = new Date(startDate.getTime()); date <= endDate; date.setDate(date.getDate() + 1)) {
+      const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
+      const now = new Date();
+      let status = 'needPlanning';
+      if (date < now) {
+        status = 'needReport';
+      }
 
-       if (shiftCodes[dayName]) {
-           Object.entries(shiftCodes[dayName]).forEach(([shiftType, shiftCode]) => {
-               shifts.push({
-                   name: shiftCode, // Shift Code as Name
-                   type: shiftType, // Morning or Afternoon
-                   week: getWeekNumber(date),
-                   year: date.getFullYear()
-               });
-           });
-       }
-   }
+      if (date > now) {
+          console.log(date.toISOString() + " is later than " + now.toISOString());
+      } else if (date < now) {
+          console.log(date + " is earlier than " + now);
+      } else {
+          console.log("🔄 Both dates are equal.");
+      }
 
-   const insertedShifts = await Shift.insertMany(shifts);
-   console.log("✅ Shifts created for the entire 2025 with shift codes!");
+
+      if (shiftCodes[dayName]) {
+        Object.entries(shiftCodes[dayName]).forEach(([shiftType, shiftCode]) => {
+          shifts.push({
+          name: shiftCode, // Shift Code as Name
+          type: shiftType, // Morning or Afternoon
+          week: getWeekNumber(date),
+          year: date.getFullYear(),
+          status: status
+          });
+        });
+      } 
+    }
+
+    const insertedShifts = await Shift.insertMany(shifts);
+    console.log("✅ Shifts created for the entire 2025-2030 with shift codes!");
 
     // **Generate Department Shifts**
     const departmentShifts = [];

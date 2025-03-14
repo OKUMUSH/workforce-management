@@ -5,299 +5,297 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Shifts</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .container { max-width: 900px; }
+        .table th, .table td { vertical-align: middle; }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
 <div class="container mt-4">
-    <h2 class="text-center">Manage Shifts</h2>
+    <h2 class="text-center">📌 Manage Shifts</h2>
 
-    <!-- 📌 Add New Shift (Initially Collapsed) -->
-    <div class="mb-3">
-        <button class="btn btn-primary w-100" onclick="toggleShiftForm()">➕ Add New Shift</button>
-    </div>
-    <div id="addShiftSection" class="card p-3 mb-3 d-none">
-        <h4 class="text-center">➕ Add New Shift</h4>
-        <form id="addShiftForm">
-            <div class="row">
-                <div class="col-md-2">
-                    <input type="number" class="form-control" id="shiftWeek" placeholder="Week" required>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control" id="shiftYear" placeholder="Year" value="2025" required>
-                </div>
-                <div class="col-md-2">
-                    <select id="shiftType" class="form-select" required>
-                        <option value="Morning">Morning</option>
-                        <option value="Afternoon">Afternoon</option>
-                        <option value="Night">Night</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select id="teamLeaderSelect" class="form-select" required>
-                        <option value="">Select Team Leader</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select id="departmentSelect" class="form-select" required>
-                        <option value="">Select Department</option>
-                    </select>
-                </div>
+<!-- 📌 Add New Shift (Collapsible) -->
+<div class="mb-3">
+    <button class="btn btn-primary w-100" onclick="toggleShiftForm()" style="display: none;">➕ Add New Shift</button>
+</div>
+<div id="addShiftSection" class="card p-3 mb-3 hidden">
+    <h5 class="text-center">➕ Add New Shift</h5>
+    <form id="addShiftForm">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="shiftName" placeholder="Shift Name" required>
             </div>
-            <button type="submit" class="btn btn-success mt-3 w-100">✅ Save Shift</button>
-        </form>
-    </div>
+            <div class="col-md-2">
+                <select id="shiftType" class="form-select" required>
+                    <option value="Morning">Morning</option>
+                    <option value="Afternoon">Afternoon</option>
+                    <option value="Night">Night</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" id="shiftWeek" placeholder="Week" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" id="shiftYear" placeholder="Year" value="2025" required>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button type="submit" class="btn btn-success">✅ Save Shift</button>
+            </div>
+        </div>
+    </form>
+</div>
 
     <!-- 📌 Shift Filters -->
-    <div class="row mb-3">
-        <div class="col-md-2">
-            <input type="number" id="filterWeek" class="form-control" placeholder="🔍 Week" onkeyup="filterShifts()">
-        </div>
-        <div class="col-md-2">
-            <input type="number" id="filterYear" class="form-control" placeholder="📅 Year" value="2025" onkeyup="filterShifts()">
-        </div>
-        <div class="col-md-2">
-            <select id="filterShiftType" class="form-select" onchange="filterShifts()">
-                <option value="">🌅 All Shifts</option>
-                <option value="Morning">Morning</option>
-                <option value="Afternoon">Afternoon</option>
-                <option value="Night">Night</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select id="filterTeamLeader" class="form-select" onchange="filterShifts()">
-                <option value="">📋 All Team Leaders</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select id="filterDepartment" class="form-select" onchange="filterShifts()">
-                <option value="">🏢 All Departments</option>
-            </select>
-        </div>
+<div class="row justify-content-center mb-3">
+    <div class="col-md-3">
+        <select id="filterWeek" class="form-select" onchange="filterShifts()">
+            <!-- Weeks will be inserted dynamically -->
+        </select>
     </div>
+    <div class="col-md-3">
+        <select id="filterYear" class="form-select" onchange="filterShifts()">
+            <!-- Years will be inserted dynamically -->
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="filterShiftType" class="form-select" onchange="filterShifts()">
+            <option value="">🌅 All Shifts</option>
+            <option value="Morning">Morning</option>
+            <option value="Afternoon">Afternoon</option>
+            <option value="Night">Night</option>
+        </select>
+    </div>
+</div>
 
     <!-- 📌 Shift List Table -->
-    <table class="table table-bordered text-center">
-        <thead class="table-dark">
-            <tr>
-                <th>Week</th>
-                <th>Year</th>
-                <th>Shift Type</th>
-                <th>Department</th>
-                <th>TL Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="shiftList">
-            <!-- Dynamically Loaded -->
-        </tbody>
-    </table>
+    <div class="card shadow-sm p-3">
+        <table class="table table-striped table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Shift</th>
+                    <th>Week</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="shiftList">
+                <!-- 📌 Shifts will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- 📌 JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", loadShifts);
+// Shift Codes Mapping
+const shiftCodes = {
+    Monday: { Morning: "MONDAY MAPO", Afternoon: "MONDAY MAPA" },
+    Tuesday: { Morning: "TUESDAY WOPO", Afternoon: "TUESDAY WOPA" },
+    Wednesday: { Morning: "WEDNESDAY DOPO", Afternoon: "WEDNESDAY DOPA" },
+    Thursday: { Morning: "THURSDAY VRPO", Afternoon: "THURSDAY VRPA" },
+    Friday: { Morning: "FRIDAY ZOPO", Afternoon: "FRIDAY ZOPA" },
+    Saturday: { Morning: "SATURDAY ZAPO", Afternoon: "SATURDAY ZAPA" },
+    Sunday: { Morning: "SUNDAY SOPO", Afternoon: "SUNDAY SOPA" },
+};
 
-    // 📌 Toggle Shift Form
-    function toggleShiftForm() {
-        const form = document.getElementById("addShiftSection");
-        form.classList.toggle("d-none");
+    // 📌 Shift Status Mapping
+    const shiftStatuses = {
+    needPlanning: { text: "🟠 Need Planning", class: "badge bg-warning text-dark" },
+    needFullPlanning: { text: "🟠 Need Full Planning", class: "badge bg-warning text-dark" },
+    planned: { text: "🟡 Planned", class: "badge bg-primary" },
+    running: { text: "🟢 Running", class: "badge bg-success" },
+    needReport: { text: "🔴 Need Report", class: "badge bg-danger" },
+    reported: { text: "✅ Reported", class: "badge bg-success" }
+};
+
+
+// 📌 Get Shift Status (Directly from shift.status)
+function getShiftStatus(shift) {
+    const statusKey = shift.status;  // ✅ Use `shift.status` directly
+    if (!statusKey || !shiftStatuses[statusKey]) {
+        return `<span class="badge bg-secondary">❌ Unknown Status</span>`;
     }
 
-    // 📌 Load Shifts & Populate Filters
-    async function loadShifts() {
-        try {
-            const [shiftRes, tlRes, deptRes] = await Promise.all([
-                fetch("/api/shifts"),
-                fetch("/api/teamleaders"),
-                fetch("/api/department")
-            ]);
+    // 📌 **Generate Status Badge**
+    const statusObj = shiftStatuses[statusKey];
+    let statusBadge = `<span class="${statusObj.class}">${statusObj.text}</span>`;
 
-            const [shiftData, tlData, deptData] = await Promise.all([
-                shiftRes.json(),
-                tlRes.json(),
-                deptRes.json()
-            ]);
-
-            console.log("✅ Shifts:", shiftData.data);
-            console.log("✅ Team Leaders:", tlData.data);
-            console.log("✅ Departments:", deptData.data);
-
-            if (!shiftData.success || !tlData.success || !deptData.success) {
-                console.error("❌ Failed to load data!");
-                return;
-            }
-
-            renderShifts(shiftData.data, tlData.data, deptData.data);
-            populateFilters(tlData.data, deptData.data);
-            populateShiftForm(tlData.data, deptData.data);
-        } catch (error) {
-            console.error("❌ Error loading shifts:", error);
-        }
+    // 🔴 **If status is "needReport", add a button**
+    if (statusKey === "needReport") {
+        statusBadge += ` <button class="btn btn-sm btn-outline-danger ms-2" onclick="reportShift('${shift._id}')">📑 Report Now</button>`;
+    }
+    // 🔴 **If status is "needPlanning or needFullPlanning", add a button**
+    if (statusKey === "needPlanning" || statusKey === "needFullPlanning") {
+        statusBadge += ` <button class="btn btn-sm btn-outline-warning ms-2" onclick="planShift('${shift._id}')">📅 Plan Now</button>`;
     }
 
-// 📌 Render Shift Table
-function renderShifts(shifts, teamLeaders = [], departments = []) {
-    const shiftList = document.getElementById("shiftList");
-    shiftList.innerHTML = "";
+    return statusBadge;
+}
 
-    if (!Array.isArray(departments)) {
-        console.error("❌ Departments is not an array:", departments);
-    }
-    if (!Array.isArray(teamLeaders)) {
-        console.error("❌ TeamLeaders is not an array:", teamLeaders);
-    }
+// Order of days for sorting
+const dayOrder = Object.keys(shiftCodes);
 
 
-    shifts.forEach(shift => {
-        const department = departments.find(d => d._id === (shift.department?._id || shift.department)) || { departmentName: "Unknown", _id: "" };
-        const teamLeader = teamLeaders.find(tl => tl._id === (shift.teamLeader?._id || shift.teamLeader)) || { name: "Unknown", _id: "" };
-
-        const shiftRow = document.createElement("tr");
-        shiftRow.innerHTML = `
-            <td><span class="editable">${shift.shiftWeek}</span></td>
-            <td><span class="editable">${shift.shiftYear}</span></td>
-            <td>
-                <span class="editable">${shift.shift}</span>
-                <select class="form-select form-select-sm d-none">
-                    <option value="Morning" ${shift.shift === "Morning" ? "selected" : ""}>Morning</option>
-                    <option value="Afternoon" ${shift.shift === "Afternoon" ? "selected" : ""}>Afternoon</option>
-                    <option value="Night" ${shift.shift === "Night" ? "selected" : ""}>Night</option>
-                </select>
-            </td>
-            <td>
-                <span class="editable">${department.departmentName}</span>
-                <select class="form-select form-select-sm d-none">
-                    ${departments.map(dept => 
-                        `<option value="${dept._id}" ${dept._id === department._id ? "selected" : ""}>${dept.departmentName}</option>`
-                    ).join("")}
-                </select>
-            </td>
-            <td>
-                <span class="editable">${teamLeader.name}</span>
-                <select class="form-select form-select-sm d-none">
-                    ${teamLeaders.map(tl => 
-                        `<option value="${tl._id}" ${tl._id === teamLeader._id ? "selected" : ""}>${tl.name}</option>`
-                    ).join("")}
-                </select>
-            </td>
-            <td>
-                <button class="btn btn-secondary btn-sm" onclick="toggleFastEdit(this)">⚡ Fast Edit</button>
-                <button class="btn btn-warning btn-sm" onclick="editShift('${shift._id}')">✏️ Edit</button>
-                <button class="btn btn-info btn-sm" onclick="viewPerformance('${shift._id}')">📊 Performance</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteShift('${shift._id}')">🗑 Delete</button>
-            </td>
-        `;
-
-        shiftList.appendChild(shiftRow);
+document.addEventListener("DOMContentLoaded", () => {
+        populateWeekYearFilters();
     });
-}
 
-// 📌 Toggle Fast Edit Mode
-function toggleFastEdit(button) {
-    const row = button.closest("tr");
-    const spans = row.querySelectorAll(".editable");
-    const selects = row.querySelectorAll("select");
-
-    const isEditing = spans[0].classList.contains("d-none");
-
-    if (isEditing) {
-        // 📌 Save changes and disable edit mode
-        const shiftId = button.getAttribute("data-id");
-
-        const updatedShift = {
-            shiftWeek: row.children[0].querySelector("span").innerText.trim(),
-            shiftYear: row.children[1].querySelector("span").innerText.trim(),
-            shift: row.children[2].querySelector("select").value,
-            department: row.children[3].querySelector("select").value,
-            teamLeader: row.children[4].querySelector("select").value
-        };
-
-        updateShift(shiftId, updatedShift);
-
-        // Toggle visibility
-        spans.forEach(span => span.classList.remove("d-none"));
-        selects.forEach(select => select.classList.add("d-none"));
-        button.textContent = "⚡ Fast Edit";
-        button.classList.remove("btn-success");
-        button.classList.add("btn-secondary");
-    } else {
-        // 📌 Enable edit mode
-        spans.forEach(span => span.classList.add("d-none"));
-        selects.forEach(select => select.classList.remove("d-none"));
-        button.textContent = "💾 Save";
-        button.classList.remove("btn-secondary");
-        button.classList.add("btn-success");
-    }
-}
-
-// 📌 Update Shift Data
-async function updateShift(id, updatedShift) {
-    try {
-        const response = await fetch(`/api/shifts/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedShift)
-        });
-
-        if (!response.ok) throw new Error("Failed to update shift");
-
-        console.log("✅ Shift Updated:", updatedShift);
-    } catch (error) {
-        console.error("❌ Error updating shift:", error);
-    }
-}
-
-    // 📌 Populate Filters
-    function populateFilters(teamLeaders, departments) {
-        document.getElementById("filterTeamLeader").innerHTML = `<option value="">📋 All Team Leaders</option>` + 
-            teamLeaders.map(tl => `<option value="${tl._id}">${tl.name}</option>`).join("");
-
-        document.getElementById("filterDepartment").innerHTML = `<option value="">🏢 All Departments</option>` + 
-            departments.map(dept => `<option value="${dept._id}">${dept.departmentName}</option>`).join("");
+    function getWeekNumber(date) {
+        const startOfYear = new Date(date.getFullYear(), 0, 1);
+        return Math.ceil((((date - startOfYear) / 86400000) + 1) / 7);
     }
 
-    // 📌 Populate Shift Form Selects
-    function populateShiftForm(teamLeaders, departments) {
-        document.getElementById("teamLeaderSelect").innerHTML = `<option value="">Select Team Leader</option>` + 
-            teamLeaders.map(tl => `<option value="${tl._id}">${tl.name}</option>`).join("");
+    async function populateWeekYearFilters() {
+        const today = new Date();
+        const currentWeek = getWeekNumber(today);
+        const currentYear = today.getFullYear();
 
-        document.getElementById("departmentSelect").innerHTML = `<option value="">Select Department</option>` + 
-            departments.map(dept => `<option value="${dept._id}">${dept.departmentName}</option>`).join("");
+        const response = await fetch("/api/shifts/weeks-years");
+        const data = await response.json();
+
+        const weekSelect = document.getElementById("filterWeek");
+        const yearSelect = document.getElementById("filterYear");
+
+        weekSelect.innerHTML = data.weeks.map(week => 
+            `<option value="${week}" ${week == currentWeek ? "selected" : ""}>Week ${week}</option>`
+        ).join("");
+
+        yearSelect.innerHTML = data.years.map(year => 
+            `<option value="${year}" ${year == currentYear ? "selected" : ""}>${year}</option>`
+        ).join("");
+
+        filterShifts();
+    }
+
+    function toggleShiftForm() {
+        document.getElementById("addShiftSection").classList.toggle("hidden");
     }
 
     // 📌 Filter Shifts
-    function filterShifts() {
-        const week = document.getElementById("filterWeek").value;
-        const year = document.getElementById("filterYear").value;
-        const shiftType = document.getElementById("filterShiftType").value;
-        const teamLeader = document.getElementById("filterTeamLeader").value;
-        const department = document.getElementById("filterDepartment").value;
+async function filterShifts() {
+    const week = document.getElementById("filterWeek").value;
+    const year = document.getElementById("filterYear").value;
+    const shiftType = document.getElementById("filterShiftType").value;
 
-        fetch(`/api/shifts?week=${week}&year=${year}&shift=${shiftType}&teamLeader=${teamLeader}&department=${department}`)
-            .then(res => res.json())
-            .then(data => renderShifts(data.data));
-    }
+    // Build query parameters dynamically
+    let queryParams = new URLSearchParams();
+    if (week) queryParams.append("week", week);
+    if (year) queryParams.append("year", year);
+    if (shiftType) queryParams.append("type", shiftType);
 
-    // 📌 Add New Shift
-    document.getElementById("addShiftForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+    const response = await fetch(`/api/shifts?${queryParams}`);
+
+    try {
+        // Fetch filtered shifts from API
         
-        const shiftWeek = document.getElementById("shiftWeek").value;
-        const shiftYear = document.getElementById("shiftYear").value;
-        const shiftType = document.getElementById("shiftType").value;
-        const teamLeader = document.getElementById("teamLeaderSelect").value;
-        const department = document.getElementById("departmentSelect").value;
+        const data = await response.json();
 
-        await fetch("/api/shifts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shiftWeek, shiftYear, shift: shiftType, teamLeader, department })
+        const shiftList = document.getElementById("shiftList");
+        shiftList.innerHTML = "";
+
+        if (data.data.length === 0) {
+            shiftList.innerHTML = `<tr><td colspan="5" class="text-center">🚫 No shifts found</td></tr>`;
+            return;
+        }
+
+        // Sort shifts by day & type
+        data.data.sort((a, b) => {
+            const dayA = dayOrder.find(day => shiftCodes[day][a.type] === a.name) || "";
+            const dayB = dayOrder.find(day => shiftCodes[day][b.type] === b.name) || "";
+
+            const dayIndexA = dayOrder.indexOf(dayA);
+            const dayIndexB = dayOrder.indexOf(dayB);
+
+            if (dayIndexA !== dayIndexB) {
+                return dayIndexA - dayIndexB; // Sort by day first
+            } else {
+                return a.type === "Morning" ? -1 : 1; // Morning shifts before Afternoon
+            }
+        });
+        // Render shifts dynamically
+        data.data.forEach(shift => {
+
+            const status = getShiftStatus(shift);
+            let actions = "";
+
+            if (status == "reported") {
+                actions = `<button class="btn btn-sm btn-outline-primary" onclick="viewPerformance('${shift._id}')">📊 View Performance</button>`;
+            }
+
+            shiftList.innerHTML += `
+                <tr>
+                    <td>${shift.name}</td>
+                    <td>${shift.type}</td>
+                    <td>${shift.week}</td>
+                    <td>${shift.year}</td>
+                    <td>${status}</td>
+                    <td>
+                        ${actions}
+                    </td>
+                </tr>`;
         });
 
-        toggleShiftForm();
-        loadShifts();
-    });
+    } catch (error) {
+        console.error("❌ Error fetching shifts:", error);
+        document.getElementById("shiftList").innerHTML =
+            `<tr><td colspan="5" class="text-center text-danger">❌ Error loading shifts</td></tr>`;
+    }
+}
 
+// 📌 Add New Shift
+document.getElementById("addShiftForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const shiftName = document.getElementById("shiftName").value.trim();
+    const shiftType = document.getElementById("shiftType").value.trim();
+    const shiftWeek = document.getElementById("shiftWeek").value.trim();
+    const shiftYear = document.getElementById("shiftYear").value.trim();
+
+    console.log("📤 Sending Shift Data:", { shiftName, shiftType, shiftWeek, shiftYear });
+
+    if (!shiftName || !shiftType || !shiftWeek || !shiftYear) {
+        console.error("❌ Error: All fields must be filled.");
+        alert("Please fill in all fields before submitting.");
+        return;
+    }
+
+    const newShift = { 
+        name: shiftName, 
+        type: shiftType, 
+        week: parseInt(shiftWeek, 10), 
+        year: parseInt(shiftYear, 10) 
+    };
+
+    try {
+        const response = await fetch("/api/shifts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newShift)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            console.error("❌ Error adding shift:", result);
+            alert(`Error: ${result.message || "Failed to add shift"}`);
+            return;
+        }
+
+        console.log("✅ Shift added successfully:", result);
+        document.getElementById("addShiftForm").reset();
+        toggleShiftForm();
+        filterShifts();
+    } catch (error) {
+        console.error("❌ Error filtering shift:", error);
+    }
+});
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

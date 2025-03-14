@@ -79,7 +79,6 @@ let allTeamleaders = [];
 // 📌 Load Workers & Team Leaders on Page Load
 document.addEventListener("DOMContentLoaded", async function () {
     await loadWorkers();
-    await loadTeamleaders();
 });
 
 // 📌 Add New Worker
@@ -115,30 +114,41 @@ document.getElementById("addWorkerForm").addEventListener("submit", async functi
     }
 });
 
-// 📌 Fetch Workers from API
-async function loadWorkers() {
+// 📌 Fetch Workers and Teamleaders from API
+loadWorkers = async () => {
     try {
+        //first get also teamleader data
+        loadTeamleaders();
+
+        // Fetch Workers
         const response = await fetch("/api/workers");
         const data = await response.json();
+
+        // Check if the response is successful
         if (!data.success) throw new Error("Failed to fetch workers");
         
         allWorkers = data.data;
+        populateTeamleaderDropdown(allTeamleaders);
         renderWorkers(allWorkers, allTeamleaders);
     } catch (error) {
         console.error("❌ Error loading workers:", error);
     }
 }
 
-// 📌 Fetch Team Leaders from API
-async function loadTeamleaders() {
+loadTeamleaders = async () => {
     try {
+        // Fetch Team Leaders
         const response = await fetch("/api/teamleaders");
         const data = await response.json();
+
+        // Check if the response is successful
         if (!data.success) throw new Error("Failed to fetch teamleaders");
 
         allTeamleaders = data.data;
+
+        // bring also teamleaders to the worker form
         populateTeamleaderDropdown(allTeamleaders);
-        renderWorkers(allWorkers, allTeamleaders);
+
     } catch (error) {
         console.error("❌ Error loading Teamleaders:", error);
     }
